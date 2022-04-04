@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { formataData } from "../../helpers/date";
 import { ArticleThumbnailProps } from "./ArticleThumbnail.types";
 
@@ -10,17 +10,35 @@ export const ArticleThumbnail: React.FC<ArticleThumbnailProps> = ({
   dataPublicacao,
   tempoLeitura = '7 min',
   autor,
-  editavel,
   id,
 }) => {
+  const [editavel, setEditavel] = useState(false);
+  const navigate = useNavigate()
+  
+  useEffect(() => {
+   const usuarioAtual = Number(localStorage.getItem('id'));
+   setEditavel(autor.id === usuarioAtual);
+ }, [autor]);
+
+ function enterArticle(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+   event.preventDefault();
+   navigate(`/artigo/${id}`);
+ }
+
+ function handleEdit(event: React.MouseEvent<HTMLButtonElement>) {
+   event.stopPropagation();
+   navigate(`/artigos/editar/${id}`)
+ }
+  
   return (
-    <div className="flex flex-col w-2/3 mt-5">
+    <div className="flex flex-col w-2/3 mt-5" onClick={enterArticle}>
         <Link to={`/artigo/${id}`}>
         <header className="flex flex-row gap-3 items-center">
           <img
             src={ autor.avatar }
             className="rounded-full"
             style={{ width: '30px', height: '30px' }}
+            alt={`${autor.nome} avatar`}
           />
           <div>{ autor.nome }</div>
           <div className="text-sm text-gray-500">{ formataData(dataPublicacao) }</div>
@@ -43,7 +61,6 @@ export const ArticleThumbnail: React.FC<ArticleThumbnailProps> = ({
           </div>
         </div>
           </Link>
-          <Link to={`/artigos/editar/${id}`}>
         <footer className="flex flex-row pt-7 gap-3 items-center">
           <div className="text-gray-500 text-xs my-1">
             { tempoLeitura } de leitura
@@ -51,20 +68,20 @@ export const ArticleThumbnail: React.FC<ArticleThumbnailProps> = ({
           {
             editavel && (
               <button
+              onClick={handleEdit}
                 className={
                   `
                   hover:bg-blue-400 bg-blue-300 text-white
                   delay-100 duration-100
                   rounded-full py-1 px-2 text-xs
                   `
-                }
+                } 
               >
                 Editar
               </button>
             )
           }
         </footer>
-        </Link>
         <hr className="mt-5" />
       </div>
         );
